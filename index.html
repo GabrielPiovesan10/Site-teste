@@ -89,7 +89,11 @@
         .price-prefix { font-size: 10px; color: #aaa; display: block; margin-bottom: 2px; }
         .price { color: #fdfa36; font-family: 'Audiowide'; font-size: 15px; display: block; margin-bottom: 6px; }
         
-        .add-btn { background: #00fff2; color: #000; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 11px; cursor: pointer; }
+        .add-btn { 
+            background: #00fff2; color: #000; border: none; padding: 6px 14px; 
+            border-radius: 8px; font-weight: 800; font-size: 11px; cursor: pointer;
+            transition: background 0.3s; /* Efeito suave na cor */
+        }
 
         /* --- FOOTER --- */
         footer {
@@ -97,7 +101,7 @@
             border-top: 2px solid #7b00ff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
         .total-box strong { font-family: 'Audiowide'; color: #fdfa36; font-size: 24px; }
-        .btn-finish { background: #00fff2; color: #000; border: none; padding: 12px 22px; border-radius: 30px; font-family: 'Audiowide'; font-size: 12px; }
+        .btn-finish { background: #00fff2; color: #000; border: none; padding: 12px 22px; border-radius: 30px; font-family: 'Audiowide'; font-size: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -192,14 +196,13 @@
 
     <footer>
         <div class="total-box"><span style="font-size:10px; color:#888; display:block;">TOTAL:</span><strong>R$ 0,00</strong></div>
-        <button class="btn-finish">PEDIR AGORA</button>
+        <button class="btn-finish" onclick="enviarPedido()">PEDIR AGORA</button>
     </footer>
 
     <script>
         // FILTRO DE CATEGORIAS
         function filterCat(category) {
             const btnClicado = event.currentTarget;
-
             const buttons = document.querySelectorAll('.cat-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
             
@@ -214,6 +217,76 @@
                     section.style.display = 'none';
                 }
             });
+        }
+
+        // SISTEMA DE CARRINHO E WHATSAPP
+        let carrinho = [];
+        let valorTotal = 0;
+
+        // Adiciona evento de clique em todos os botões "ADICIONAR"
+        document.querySelectorAll('.add-btn').forEach(botao => {
+            botao.addEventListener('click', function() {
+                const card = this.closest('.product-card');
+                const nomeProduto = card.querySelector('h4').innerText;
+                const textoPreco = card.querySelector('.price').innerText;
+                
+                // Converte "R$ 30,99" em número 30.99
+                const precoNumero = parseFloat(textoPreco.replace('R$', '').replace('.', '').replace(',', '.').trim());
+
+                // Adiciona ao carrinho visual
+                carrinho.push({ nome: nomeProduto, preco: precoNumero });
+                valorTotal += precoNumero;
+
+                // Atualiza o rodapé com o total formatado
+                document.querySelector('.total-box strong').innerText = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
+
+                // Feedback visual: botão fica verde escrito "ADD" por 1 segundo
+                const textoOriginal = this.innerText;
+                this.innerText = '✔ ADD';
+                this.style.background = '#39ff14'; // Verde neon
+                
+                setTimeout(() => {
+                    this.innerText = textoOriginal;
+                    this.style.background = '#00fff2'; // Volta ao azul original
+                }, 1000);
+            });
+        });
+
+        // Função que gera a mensagem e abre o WhatsApp
+        function enviarPedido() {
+            if (carrinho.length === 0) {
+                alert('Seu carrinho está vazio! Escolha algum item da galáxia antes de pedir.');
+                return;
+            }
+
+            let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* 🚀\n\n";
+            mensagem += "*Itens do Pedido:*\n";
+
+            // Agrupa itens repetidos
+            const contagem = {};
+            carrinho.forEach(item => {
+                if (contagem[item.nome]) {
+                    contagem[item.nome].quantidade += 1;
+                    contagem[item.nome].subtotal += item.preco;
+                } else {
+                    contagem[item.nome] = { quantidade: 1, preco: item.preco, subtotal: item.preco };
+                }
+            });
+
+            // Adiciona os itens na mensagem
+            for (let item in contagem) {
+                mensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
+            }
+
+            mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
+            mensagem += "Gostaria de finalizar meu pedido, por favor!";
+
+            // *** ATENÇÃO: COLOQUE O NÚMERO DA STAR AÇAITERIA AQUI EMBAIXO ***
+            // Formato: 55 + DDD + Número (tudo junto, sem espaço ou traço)
+            const numeroWhatsApp = "5519993405480"; 
+
+            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+            window.open(linkWhatsApp, '_blank');
         }
     </script>
 
