@@ -237,7 +237,6 @@
                 document.querySelector('.total-box strong').innerText = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
 
                 const textoOriginal = this.innerText;
-                // Usando código Unicode para garantir que o ✔ não quebre no JS
                 this.innerText = '\u2714 ADD';
                 this.style.background = '#39ff14'; 
                 
@@ -250,13 +249,12 @@
 
         function enviarPedido() {
             if (carrinho.length === 0) {
-                alert('Seu carrinho está vazio! Escolha algum item da galáxia antes de pedir.');
+                alert('Seu carrinho está vazio! Escolha algum item do cardápio antes de pedir.');
                 return;
             }
 
-            // Usando Unicode para garantir o foguete no WhatsApp
-            let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* \uD83D\uDE80\n\n";
-            mensagem += "*Itens do Pedido:*\n";
+            // MENSAGEM DOS ITENS
+            let restoDaMensagem = "*Itens do Pedido:*\n";
 
             const contagem = {};
             carrinho.forEach(item => {
@@ -269,15 +267,22 @@
             });
 
             for (let item in contagem) {
-                mensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
+                restoDaMensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
             }
 
-            mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
-            mensagem += "Gostaria de finalizar meu pedido, por favor!";
+            restoDaMensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
+            restoDaMensagem += "Gostaria de finalizar meu pedido, por favor!";
 
+            // *** ATENÇÃO: NÚMERO DA AÇAITERIA AQUI ***
             const numeroWhatsApp = "5519993405480"; 
+            
+            // Aqui está a mágica: 
+            // %F0%9F%9A%80 é o código exato do Foguete na internet. 
+            // %0A é o Enter. 
+            // Assim não quebra em nenhum celular!
+            const tituloComFogueteSeguro = "*NOVO PEDIDO - STAR AÇAITERIA* %F0%9F%9A%80%0A%0A";
 
-            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${tituloComFogueteSeguro}${encodeURIComponent(restoDaMensagem)}`;
             window.open(linkWhatsApp, '_blank');
         }
     </script>
