@@ -92,7 +92,7 @@
         .add-btn { 
             background: #00fff2; color: #000; border: none; padding: 6px 14px; 
             border-radius: 8px; font-weight: 800; font-size: 11px; cursor: pointer;
-            transition: background 0.3s; /* Efeito suave na cor */
+            transition: background 0.3s; 
         }
 
         /* --- FOOTER --- */
@@ -113,15 +113,15 @@
     </header>
 
     <div id="categories">
-        <button class="cat-btn active" onclick="filterCat('all')">🚀 Todos</button>
-        <button class="cat-btn" onclick="filterCat('goumerts')">⭐ Açaí Goumert's</button>
-        <button class="cat-btn" onclick="filterCat('acai')">🥣 Açaí</button>
-        <button class="cat-btn" onclick="filterCat('sorvetes')">🍨 Sorvetes</button>
-        <button class="cat-btn" onclick="filterCat('milkshake')">🥤 Milk-shake</button>
-        <button class="cat-btn" onclick="filterCat('picoles')">🍦 Picolés</button>
-        <button class="cat-btn" onclick="filterCat('salada')">🍓 Salada de Fruta</button>
-        <button class="cat-btn" onclick="filterCat('fondue')">🍫 Roleta de Fondue</button>
-        <button class="cat-btn" onclick="filterCat('bebidas')">🥤 Bebidas</button>
+        <button class="cat-btn active" onclick="filterCat('all')">&#128640; Todos</button>
+        <button class="cat-btn" onclick="filterCat('goumerts')">&#11088; Açaí Goumert's</button>
+        <button class="cat-btn" onclick="filterCat('acai')">&#129379; Açaí</button>
+        <button class="cat-btn" onclick="filterCat('sorvetes')">&#127848; Sorvetes</button>
+        <button class="cat-btn" onclick="filterCat('milkshake')">&#129380; Milk-shake</button>
+        <button class="cat-btn" onclick="filterCat('picoles')">&#127846; Picolés</button>
+        <button class="cat-btn" onclick="filterCat('salada')">&#127827; Salada de Fruta</button>
+        <button class="cat-btn" onclick="filterCat('fondue')">&#127851; Roleta de Fondue</button>
+        <button class="cat-btn" onclick="filterCat('bebidas')">&#129380; Bebidas</button>
     </div>
 
     <div class="container" id="menu-container">
@@ -223,46 +223,41 @@
         let carrinho = [];
         let valorTotal = 0;
 
-        // Adiciona evento de clique em todos os botões "ADICIONAR"
         document.querySelectorAll('.add-btn').forEach(botao => {
             botao.addEventListener('click', function() {
                 const card = this.closest('.product-card');
                 const nomeProduto = card.querySelector('h4').innerText;
                 const textoPreco = card.querySelector('.price').innerText;
                 
-                // Converte "R$ 30,99" em número 30.99
                 const precoNumero = parseFloat(textoPreco.replace('R$', '').replace('.', '').replace(',', '.').trim());
 
-                // Adiciona ao carrinho visual
                 carrinho.push({ nome: nomeProduto, preco: precoNumero });
                 valorTotal += precoNumero;
 
-                // Atualiza o rodapé com o total formatado
                 document.querySelector('.total-box strong').innerText = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
 
-                // Feedback visual: botão fica verde escrito "ADD" por 1 segundo
                 const textoOriginal = this.innerText;
-                this.innerText = '✔ ADD';
-                this.style.background = '#39ff14'; // Verde neon
+                // Usando código Unicode para garantir que o ✔ não quebre no JS
+                this.innerText = '\u2714 ADD';
+                this.style.background = '#39ff14'; 
                 
                 setTimeout(() => {
                     this.innerText = textoOriginal;
-                    this.style.background = '#00fff2'; // Volta ao azul original
+                    this.style.background = '#00fff2'; 
                 }, 1000);
             });
         });
 
-        // Função que gera a mensagem e abre o WhatsApp
         function enviarPedido() {
             if (carrinho.length === 0) {
                 alert('Seu carrinho está vazio! Escolha algum item da galáxia antes de pedir.');
                 return;
             }
 
-            let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* 🚀\n\n";
+            // Usando Unicode para garantir o foguete no WhatsApp
+            let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* \uD83D\uDE80\n\n";
             mensagem += "*Itens do Pedido:*\n";
 
-            // Agrupa itens repetidos
             const contagem = {};
             carrinho.forEach(item => {
                 if (contagem[item.nome]) {
@@ -273,7 +268,6 @@
                 }
             });
 
-            // Adiciona os itens na mensagem
             for (let item in contagem) {
                 mensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
             }
@@ -281,8 +275,6 @@
             mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
             mensagem += "Gostaria de finalizar meu pedido, por favor!";
 
-            // *** ATENÇÃO: COLOQUE O NÚMERO DA STAR AÇAITERIA AQUI EMBAIXO ***
-            // Formato: 55 + DDD + Número (tudo junto, sem espaço ou traço)
             const numeroWhatsApp = "5519993405480"; 
 
             const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
