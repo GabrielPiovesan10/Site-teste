@@ -101,7 +101,25 @@
             border-top: 2px solid #7b00ff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
         .total-box strong { font-family: 'Audiowide'; color: #fdfa36; font-size: 24px; }
-        .btn-finish { background: #00fff2; color: #000; border: none; padding: 12px 22px; border-radius: 30px; font-family: 'Audiowide'; font-size: 12px; cursor: pointer; }
+        .btn-finish { background: #00fff2; color: #000; border: none; padding: 12px 22px; border-radius: 30px; font-family: 'Audiowide'; font-size: 12px; cursor: pointer; transition: 0.3s; }
+
+        /* --- MODAL DO CARRINHO (ADICIONADO) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(5px); }
+        .modal-content { background: #0a0015; width: 100%; max-height: 85vh; border-top-left-radius: 25px; border-top-right-radius: 25px; border-top: 2px solid #00fff2; display: flex; flex-direction: column; padding: 20px; color: #fff; animation: slideUp 0.3s ease-out; box-shadow: 0 -5px 20px rgba(0, 255, 242, 0.2); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(123, 0, 255, 0.3); padding-bottom: 15px; margin-bottom: 15px; }
+        .modal-header h3 { color: #00fff2; font-size: 20px; font-family: 'Audiowide'; margin: 0; }
+        .close-modal { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; }
+        #cart-items-container { overflow-y: auto; flex-grow: 1; margin-bottom: 15px; padding-right: 5px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(123, 0, 255, 0.2); }
+        .cart-item-info { display: flex; flex-direction: column; flex-grow: 1; }
+        .cart-item-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+        .cart-item-price { font-size: 13px; color: #fdfa36; font-family: 'Audiowide'; }
+        .cart-item-actions { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 20px; }
+        .qty-btn { background: none; border: none; color: #00fff2; font-size: 18px; font-weight: bold; cursor: pointer; width: 25px; text-align: center; }
+        .cart-qty { font-size: 15px; font-weight: bold; color: #fff; }
+        .cart-total-line { font-size: 22px; font-family: 'Audiowide'; color: #fdfa36; text-align: right; margin-bottom: 15px; }
+        .btn-send-whatsapp { background: #00fff2; color: #000; border: none; padding: 16px; border-radius: 30px; font-family: 'Audiowide'; font-size: 15px; cursor: pointer; width: 100%; box-shadow: 0 0 15px rgba(0, 255, 242, 0.4); }
     </style>
 </head>
 <body>
@@ -194,9 +212,21 @@
 
     </div>
 
+    <div id="cart-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>CARRINHO</h3>
+                <button class="close-modal" onclick="toggleCart()">X</button>
+            </div>
+            <div id="cart-items-container"></div>
+            <div class="cart-total-line">Total: <span id="modal-total">R$ 0,00</span></div>
+            <button class="btn-send-whatsapp" onclick="enviarPedido()">FINALIZAR PEDIDO</button>
+        </div>
+    </div>
+
     <footer>
         <div class="total-box"><span style="font-size:10px; color:#888; display:block;">TOTAL:</span><strong>R$ 0,00</strong></div>
-        <button class="btn-finish" onclick="enviarPedido()">PEDIR AGORA</button>
+        <button class="btn-finish" onclick="toggleCart()">VER CARRINHO</button>
     </footer>
 
     <script>
@@ -219,25 +249,86 @@
             });
         }
 
-        // SISTEMA DE CARRINHO E WHATSAPP
-        let carrinho = [];
-        let valorTotal = 0;
+        // SISTEMA AVANÇADO DE CARRINHO
+        let carrinho = []; 
 
+        function atualizarCarrinho() {
+            let valorTotal = 0;
+            let totalItens = 0;
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+
+            carrinho.forEach((item, index) => {
+                valorTotal += item.preco * item.qtd;
+                totalItens += item.qtd;
+
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <span class="cart-item-title">${item.nome}</span>
+                            <span class="cart-item-price">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="qty-btn" onclick="alterarQtd(${index}, -1)">-</button>
+                            <span class="cart-qty">${item.qtd}</span>
+                            <button class="qty-btn" onclick="alterarQtd(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const textoTotal = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
+            document.querySelector('.total-box strong').innerText = textoTotal;
+            document.getElementById('modal-total').innerText = textoTotal;
+
+            const btnRodape = document.querySelector('footer .btn-finish');
+            if (totalItens > 0) {
+                btnRodape.innerText = `VER CARRINHO (${totalItens})`;
+                btnRodape.style.boxShadow = "0 0 15px #00fff2";
+            } else {
+                btnRodape.innerText = 'VER CARRINHO';
+                btnRodape.style.boxShadow = "none";
+                container.innerHTML = '<p style="text-align:center; color:#aaa; margin-top: 20px;">Seu carrinho está vazio.</p>';
+            }
+        }
+
+        function alterarQtd(index, mudanca) {
+            carrinho[index].qtd += mudanca;
+            if (carrinho[index].qtd <= 0) {
+                carrinho.splice(index, 1);
+            }
+            atualizarCarrinho();
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                atualizarCarrinho();
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Evento de clique para adicionar itens
         document.querySelectorAll('.add-btn').forEach(botao => {
             botao.addEventListener('click', function() {
                 const card = this.closest('.product-card');
                 const nomeProduto = card.querySelector('h4').innerText;
                 const textoPreco = card.querySelector('.price').innerText;
-                
                 const precoNumero = parseFloat(textoPreco.replace('R$', '').replace('.', '').replace(',', '.').trim());
 
-                carrinho.push({ nome: nomeProduto, preco: precoNumero });
-                valorTotal += precoNumero;
+                let itemExistente = carrinho.find(i => i.nome === nomeProduto);
+                if (itemExistente) {
+                    itemExistente.qtd += 1;
+                } else {
+                    carrinho.push({ nome: nomeProduto, preco: precoNumero, qtd: 1 });
+                }
 
-                document.querySelector('.total-box strong').innerText = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
+                atualizarCarrinho();
 
                 const textoOriginal = this.innerText;
-                this.innerText = '\u2714 ADD'; // Check universal em código
+                this.innerText = '\u2714 ADD'; 
                 this.style.background = '#39ff14'; 
                 
                 setTimeout(() => {
@@ -247,39 +338,27 @@
             });
         });
 
+        // Enviar pedido final
         function enviarPedido() {
             if (carrinho.length === 0) {
                 alert('Seu carrinho está vazio! Escolha algum item do cardápio antes de pedir.');
                 return;
             }
 
-            // Usando a ESTRELA Universal (⭐) que faz sentido com "STAR" Açaiteria
             let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* ⭐\n\n";
             mensagem += "*Itens do Pedido:*\n";
 
-            const contagem = {};
+            let valorTotal = 0;
             carrinho.forEach(item => {
-                if (contagem[item.nome]) {
-                    contagem[item.nome].quantidade += 1;
-                    contagem[item.nome].subtotal += item.preco;
-                } else {
-                    contagem[item.nome] = { quantidade: 1, preco: item.preco, subtotal: item.preco };
-                }
+                valorTotal += item.preco * item.qtd;
+                mensagem += `${item.qtd}x ${item.nome} - R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`;
             });
-
-            for (let item in contagem) {
-                mensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
-            }
 
             mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
             mensagem += "Gostaria de finalizar meu pedido, por favor!";
 
             const numeroWhatsApp = "5519993405480"; 
-
-            // API oficial do WhatsApp que não falha no Android
             const linkWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensagem)}`;
-            
-            // Usando location.href para evitar bloqueios de popup no celular
             window.location.href = linkWhatsApp;
         }
     </script>
