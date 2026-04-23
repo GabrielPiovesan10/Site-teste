@@ -253,8 +253,10 @@
                 return;
             }
 
-            // MENSAGEM DOS ITENS
-            let restoDaMensagem = "*Itens do Pedido:*\n";
+            // A MÁGICA DEFINITIVA AQUI: Gerando o foguete direto na memória do navegador
+            const foguete = String.fromCodePoint(0x1F680);
+            let mensagem = `*NOVO PEDIDO - STAR AÇAITERIA* ${foguete}\n\n`;
+            mensagem += "*Itens do Pedido:*\n";
 
             const contagem = {};
             carrinho.forEach(item => {
@@ -267,22 +269,15 @@
             });
 
             for (let item in contagem) {
-                restoDaMensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
+                mensagem += `${contagem[item].quantidade}x ${item} - R$ ${contagem[item].subtotal.toFixed(2).replace('.', ',')}\n`;
             }
 
-            restoDaMensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
-            restoDaMensagem += "Gostaria de finalizar meu pedido, por favor!";
+            mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
+            mensagem += "Gostaria de finalizar meu pedido, por favor!";
 
-            // *** ATENÇÃO: NÚMERO DA AÇAITERIA AQUI ***
             const numeroWhatsApp = "5519993405480"; 
-            
-            // Aqui está a mágica: 
-            // %F0%9F%9A%80 é o código exato do Foguete na internet. 
-            // %0A é o Enter. 
-            // Assim não quebra em nenhum celular!
-            const tituloComFogueteSeguro = "*NOVO PEDIDO - STAR AÇAITERIA* %F0%9F%9A%80%0A%0A";
 
-            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${tituloComFogueteSeguro}${encodeURIComponent(restoDaMensagem)}`;
+            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
             window.open(linkWhatsApp, '_blank');
         }
     </script>
