@@ -113,7 +113,7 @@
     </header>
 
     <div id="categories">
-        <button class="cat-btn active" onclick="filterCat('all')">&#128640; Todos</button>
+        <button class="cat-btn active" onclick="filterCat('all')">&#11088; Todos</button>
         <button class="cat-btn" onclick="filterCat('goumerts')">&#11088; Açaí Goumert's</button>
         <button class="cat-btn" onclick="filterCat('acai')">&#129379; Açaí</button>
         <button class="cat-btn" onclick="filterCat('sorvetes')">&#127848; Sorvetes</button>
@@ -237,7 +237,7 @@
                 document.querySelector('.total-box strong').innerText = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
 
                 const textoOriginal = this.innerText;
-                this.innerText = '\u2714 ADD';
+                this.innerText = '\u2714 ADD'; // Check universal em código
                 this.style.background = '#39ff14'; 
                 
                 setTimeout(() => {
@@ -253,9 +253,8 @@
                 return;
             }
 
-            // A MÁGICA DEFINITIVA AQUI: Gerando o foguete direto na memória do navegador
-            const foguete = String.fromCodePoint(0x1F680);
-            let mensagem = `*NOVO PEDIDO - STAR AÇAITERIA* ${foguete}\n\n`;
+            // Usando a ESTRELA Universal (⭐) que faz sentido com "STAR" Açaiteria
+            let mensagem = "*NOVO PEDIDO - STAR AÇAITERIA* ⭐\n\n";
             mensagem += "*Itens do Pedido:*\n";
 
             const contagem = {};
@@ -275,10 +274,13 @@
             mensagem += `\n*TOTAL: R$ ${valorTotal.toFixed(2).replace('.', ',')}*\n\n`;
             mensagem += "Gostaria de finalizar meu pedido, por favor!";
 
-            const numeroWhatsApp = "5519993405480"; 
+            const numeroWhatsApp = "5519999999999"; 
 
-            const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-            window.open(linkWhatsApp, '_blank');
+            // API oficial do WhatsApp que não falha no Android
+            const linkWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensagem)}`;
+            
+            // Usando location.href para evitar bloqueios de popup no celular
+            window.location.href = linkWhatsApp;
         }
     </script>
 
